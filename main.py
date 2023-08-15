@@ -22,9 +22,9 @@ def get_config(config_parser, type, name):
     try:
         return config_parser.getboolean(type, name)
     except Exception:
-        print(f"\nERRO:\n\nConfig '{name}' doenst exists in config.cfg\
-                         \nDelete the config file to create a working new one")
-        input('Enter any key to close')
+        print(f"\n ERROR:\n\n Config '{name}' doenst exists in config.cfg\
+                         \n Delete the config file to create a working new one")
+        input('\n Enter any key to close')
         raise Exception()
 
 
@@ -70,8 +70,8 @@ def create_zip(directory_path):
 
     # Verify if dir exists
     if not os.path.exists(directory_path):
-        print(f"\nERRO:\n\nfolder '{directory_path}' doesnt exists.")
-        input('Enter any key to close')
+        print(f"\n ERROR:\n\n folder '{directory_path}' doesnt exists.")
+        input('\n Enter any key to close')
         raise Exception()
 
     # Get dir basename
@@ -95,8 +95,8 @@ def create_zip(directory_path):
 def remove_directory(directory_path):
     # Delete copy dir
     if not os.path.exists(directory_path):
-        print(f'\nERRO:\n\nFolder "{directory_path}" doesnt exists')
-        input('Enter any key to close')
+        print(f'\n ERROR:\n\n Folder "{directory_path}" doesnt exists')
+        input('\n Enter any key to close')
         raise Exception()
     shutil.rmtree(directory_path)
 
@@ -105,10 +105,10 @@ def copy_and_zip(source_folder, backup_folder):
 
     # Verify if game save folder exists
     if not os.path.exists(source_folder):
-        print(f'\nERRO:\n\nFolder "{source_folder}" doesnt exists\
-                        \nVerify the configs in config.cfg file\
-                        \n(If needed, delete the file to script recreate a working new one)')
-        input('Enter any key to close')
+        print(f'\n ERROR:\n\n Folder "{source_folder}" doesnt exists\
+                        \n Verify the configs in config.cfg file\
+                        \n (If needed, delete the file to script recreate a working new one)')
+        input('\n Enter any key to close')
         raise Exception()
 
     # Create backup folder if not yet exists
