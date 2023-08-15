@@ -32,8 +32,8 @@ If you want, you can create a executable with *[pyinstaller](https://pyinstaller
 
     
 **Tip**
-- Use in *.bat* file to start with the game
-- Use on *Windows Startup* to backup on every Windows Start
+- Use in *[.bat](https://www.shellhacks.com/create-batch-file-bat-to-run-exe-program/)* file to start with the game
+- Use on *[Windows Startup](https://www.howtogeek.com/208224/how-to-add-a-program-to-startup-in-windows/)* to backup on every Windows Start
     
 ## Config
 
