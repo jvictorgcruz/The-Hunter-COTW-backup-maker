@@ -1,0 +1,5 @@
+# pyinstaller build files
+*.spec
+build
+dist
+.mypy_cache
