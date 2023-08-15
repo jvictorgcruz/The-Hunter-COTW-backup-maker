@@ -22,8 +22,10 @@ def get_config(config_parser, type, name):
     try:
         return config_parser.getboolean(type, name)
     except Exception:
-        raise Exception(f"Config '{name}' doenst exists in config.cfg\
+        print(f"Config '{name}' doenst exists in config.cfg\
                          \nDelete the config file to create a working new one")
+        input('Tecle ENTER para fechar')
+        raise Exception()
 
 
 def import_config():
@@ -68,7 +70,9 @@ def create_zip(directory_path):
 
     # Verify if dir exists
     if not os.path.exists(directory_path):
-        raise Exception(f"folder '{directory_path}' doesnt exists.")
+        print(f"folder '{directory_path}' doesnt exists.")
+        input('Tecle ENTER para fechar')
+        raise Exception()
 
     # Get dir basename
     base_name = os.path.basename(directory_path)
@@ -91,7 +95,9 @@ def create_zip(directory_path):
 def remove_directory(directory_path):
     # Delete copy dir
     if not os.path.exists(directory_path):
-        raise Exception(f'Folder "{directory_path}" doesnt exists')
+        print(f'Folder "{directory_path}" doesnt exists')
+        input('Tecle ENTER para fechar')
+        raise Exception()
     shutil.rmtree(directory_path)
 
 
@@ -99,10 +105,12 @@ def copy_and_zip(source_folder, backup_folder):
 
     # Verify if game save folder exists
     if not os.path.exists(source_folder):
-        raise Exception(f'Folder "{source_folder}" doesnt exists\
+        print(f'Folder "{source_folder}" doesnt exists\
                         \nVerify the configs in config.cfg file\
                         \n(If needed, delete the file to script\
                         recreate a working new one)')
+        input('Tecle ENTER para fechar')
+        raise Exception()
 
     # Create backup folder if not yet exists
     backup_folder_path = os.path.join(source_folder, backup_folder)
