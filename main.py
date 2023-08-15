@@ -100,15 +100,16 @@ def copy_and_zip(source_folder, backup_folder):
                         recreate a working new one)')
 
     # Create backup folder if not yet exists
-    if not os.path.exists(backup_folder):
-        os.makedirs(backup_folder)
+    backup_folder_path = os.path.join(source_folder, backup_folder)
+    if not os.path.exists(backup_folder_path):
+        os.makedirs(backup_folder_path)
 
     # Create backup filename with timestamp
     now = datetime.now()
     timestamp = now.strftime('%Y-%m-%d_%H-%M-%S')
     backup_filename = f'bkp_{timestamp}'
 
-    backup_path = os.path.join(source_folder, backup_folder, backup_filename)
+    backup_path = os.path.join(backup_folder_path, backup_filename)
 
     # Create folder copy to backup_folder
     for item in os.listdir(source_folder):
