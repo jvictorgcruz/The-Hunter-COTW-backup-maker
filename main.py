@@ -1,14 +1,69 @@
 import os
+import configparser
 import shutil
 import zipfile
 from datetime import datetime
+
+
+def create_config_file(config_file_path):
+    print(f"Config file {config_file_path} doesnt exists. Creating...")
+    config = configparser.ConfigParser()
+    config['Settings'] = {
+        'epic_games': 'True',
+        'onedrive': 'False'
+    }
+
+    with open(config_file_path, 'w') as configfile:
+        config.write(configfile)
+
+
+def get_config(config_parser, type, name):
+    try:
+        return config_parser.getboolean(type, name)
+    except Exception:
+        raise Exception(f"Config '{name}' doenst exists in config.cfg\
+                         \nDelete the config file to create a working new one")
+
+
+def import_config():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file_path = os.path.join(script_dir, 'config.cfg')
+    config = configparser.ConfigParser()
+
+    # Create config if not yet exists
+    if not os.path.exists(config_file_path):
+        create_config_file(config_file_path)
+
+    config.read(config_file_path)
+
+    # import configs
+    epic_games = get_config(config, 'Settings', 'epic_games')
+    onedrive = get_config(config, 'Settings', 'onedrive')
+    return [epic_games, onedrive]
+
+
+def get_source_folder():
+    [epic_games, onedrive] = import_config()
+    user_path = os.path.expanduser('~')
+    documents_path = 'Documents'
+
+    if onedrive:
+        documents_path = os.path.join('OneDrive', documents_path)
+
+    source_folder = os.path.join(user_path, documents_path,
+                                 'Avalanche Studios')
+
+    if epic_games:
+        source_folder = os.path.join(source_folder, 'Epic Games Store')
+
+    return source_folder
 
 
 def create_zip(directory_path):
 
     # Verify if dir exists
     if not os.path.exists(directory_path):
-       raise Exception(f"folder '{directory_path}' doesnt exists.")
+        raise Exception(f"folder '{directory_path}' doesnt exists.")
 
     # Get dir basename
     base_name = os.path.basename(directory_path)
@@ -27,6 +82,7 @@ def create_zip(directory_path):
                 arcname = os.path.relpath(file_path, directory_path)
                 zipf.write(file_path, arcname)
 
+
 def remove_directory(directory_path):
     # Delete copy dir
     shutil.rmtree(directory_path)
@@ -37,7 +93,7 @@ def copy_and_zip(source_folder, backup_folder):
     # Verify if game save folder exists
     if not os.path.exists(source_folder):
         raise Exception(f'Folder "{source_folder}" doesnt exists')
-    
+
     # Create backup folder if not yet exists
     if not os.path.exists(backup_folder):
         os.makedirs(backup_folder)
@@ -46,7 +102,7 @@ def copy_and_zip(source_folder, backup_folder):
     now = datetime.now()
     timestamp = now.strftime('%Y-%m-%d_%H-%M-%S')
     backup_filename = f'bkp_{timestamp}'
-    
+
     backup_path = os.path.join(source_folder, backup_folder, backup_filename)
 
     # Create folder copy to backup_folder
@@ -61,8 +117,8 @@ def copy_and_zip(source_folder, backup_folder):
 
     print('Backup created with sucess')
 
-source_folder = os.path.join(os.path.expanduser('~'), 'Documents', 'Avalanche Studios')
-backup_folder = 'Bkps'
 
 if __name__ == '__main__':
+    source_folder = get_source_folder()
+    backup_folder = 'Bkps'
     copy_and_zip(source_folder, backup_folder)
