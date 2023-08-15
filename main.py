@@ -2,6 +2,7 @@ import os
 import configparser
 import shutil
 import zipfile
+import sys
 from datetime import datetime
 
 
@@ -26,7 +27,11 @@ def get_config(config_parser, type, name):
 
 
 def import_config():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    if getattr(sys, 'frozen', False):
+        script_dir = os.path.dirname(os.path.abspath(sys.executable))
+    elif __file__:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+
     config_file_path = os.path.join(script_dir, 'config.cfg')
     config = configparser.ConfigParser()
 
