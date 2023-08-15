@@ -85,6 +85,8 @@ def create_zip(directory_path):
 
 def remove_directory(directory_path):
     # Delete copy dir
+    if not os.path.exists(directory_path):
+        raise Exception(f'Folder "{directory_path}" doesnt exists')
     shutil.rmtree(directory_path)
 
 
@@ -92,7 +94,10 @@ def copy_and_zip(source_folder, backup_folder):
 
     # Verify if game save folder exists
     if not os.path.exists(source_folder):
-        raise Exception(f'Folder "{source_folder}" doesnt exists')
+        raise Exception(f'Folder "{source_folder}" doesnt exists\
+                        \nVerify the configs in config.cfg file\
+                        \n(If needed, delete the file to script\
+                        recreate a working new one)')
 
     # Create backup folder if not yet exists
     if not os.path.exists(backup_folder):
