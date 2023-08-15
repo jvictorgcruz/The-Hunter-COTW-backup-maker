@@ -24,7 +24,7 @@ def get_config(config_parser, type, name):
     except Exception:
         print(f"\nERRO:\n\nConfig '{name}' doenst exists in config.cfg\
                          \nDelete the config file to create a working new one")
-        input('Tecle ENTER para fechar')
+        input('Enter any key to close')
         raise Exception()
 
 
@@ -71,7 +71,7 @@ def create_zip(directory_path):
     # Verify if dir exists
     if not os.path.exists(directory_path):
         print(f"\nERRO:\n\nfolder '{directory_path}' doesnt exists.")
-        input('Tecle ENTER para fechar')
+        input('Enter any key to close')
         raise Exception()
 
     # Get dir basename
@@ -96,7 +96,7 @@ def remove_directory(directory_path):
     # Delete copy dir
     if not os.path.exists(directory_path):
         print(f'\nERRO:\n\nFolder "{directory_path}" doesnt exists')
-        input('Tecle ENTER para fechar')
+        input('Enter any key to close')
         raise Exception()
     shutil.rmtree(directory_path)
 
@@ -108,7 +108,7 @@ def copy_and_zip(source_folder, backup_folder):
         print(f'\nERRO:\n\nFolder "{source_folder}" doesnt exists\
                         \nVerify the configs in config.cfg file\
                         \n(If needed, delete the file to script recreate a working new one)')
-        input('Tecle ENTER para fechar')
+        input('Enter any key to close')
         raise Exception()
 
     # Create backup folder if not yet exists
