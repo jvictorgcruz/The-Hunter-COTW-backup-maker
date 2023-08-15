@@ -2,4 +2,7 @@
 *.spec
 build
 dist
+
 .mypy_cache
+*.ico
+*.lnk
