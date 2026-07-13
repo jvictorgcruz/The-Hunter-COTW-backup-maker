@@ -13,14 +13,14 @@ func DetectSavePath() string {
 	}
 
 	possiblePaths := []string{
-		// Steam
-		filepath.Join(home, "Documents", "Avalanche Studios"),
 		// Epic
 		filepath.Join(home, "Documents", "Avalanche Studios", "Epic Games Store"),
-		// Steam (OneDrive)
-		filepath.Join(home, "OneDrive", "Documents", "Avalanche Studios"),
 		// Epic (OneDrive)
 		filepath.Join(home, "OneDrive", "Documents", "Avalanche Studios", "Epic Games Store"),
+		// Steam
+		filepath.Join(home, "Documents", "Avalanche Studios"),
+		// Steam (OneDrive)
+		filepath.Join(home, "OneDrive", "Documents", "Avalanche Studios"),
 	}
 
 	for _, path := range possiblePaths {
