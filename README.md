@@ -83,7 +83,7 @@ fyne package -os windows -icon assets/icon.png
 
 Planned improvements for future versions include:
 
-- [ ] **Custom Rotation Limit in UI**: Input field in the graphical interface to customize the number of stored backups (currently hardcoded to 3).
+- [V] **Custom Rotation Limit in UI**: Input field in the graphical interface to customize the number of stored backups (currently hardcoded to 3).
 - [ ] **Scheduled Backups (Native)**: Native background `Cron` system to perform periodic backups while the game is open.
 - [ ] **Cloud Integration (Google Drive)**: OAuth2 login via web browser to automatically upload backups to the cloud securely.
 

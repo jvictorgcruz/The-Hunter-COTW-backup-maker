@@ -11,6 +11,7 @@ type Config struct {
 	SourceDir       string `json:"source_dir" validate:"required,dir_exists"`
 	DestinationDir  string `json:"destination_dir" validate:"required,dir_exists"`
 	BackupOnStartup bool   `json:"autostart"`
+	MaxBackups      int    `json:"max_backups" validate:"required,min=1,max=10"`
 }
 
 func SaveConfig(cfg *Config) error {
@@ -74,6 +75,19 @@ func getConfigPath() (string, error) {
 	}
 
 	return configFilePath, nil
+}
+
+func ClearConfig() error {
+	path, err := getConfigPath()
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
 }
 
 func BackupOnStartupActive() bool {

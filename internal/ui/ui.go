@@ -3,6 +3,7 @@ package ui
 import (
 	_ "embed"
 	"errors"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -38,7 +39,11 @@ func SetupUI(window fyne.Window) {
 	destinationEntry, destinationRow := createFolderSelector("Selecione a pasta de destino...", window)
 	destinationEntry.SetText(cfg.DestinationDir)
 
-	BackupOnStartup := cfg.BackupOnStartup
+	backupOnStartup := cfg.BackupOnStartup
+	if cfg.MaxBackups <= 0 {
+		cfg.MaxBackups = 3
+	}
+	maxBackups := cfg.MaxBackups
 
 	checkIfChanged := func() {
 		if saveBtn == nil {
@@ -46,7 +51,8 @@ func SetupUI(window fyne.Window) {
 		}
 		hasChanges := sourceEntry.Text != cfg.SourceDir ||
 			destinationEntry.Text != cfg.DestinationDir ||
-			BackupOnStartup != cfg.BackupOnStartup
+			backupOnStartup != cfg.BackupOnStartup ||
+			maxBackups != cfg.MaxBackups
 		if hasChanges {
 			saveBtn.Enable()
 		} else {
@@ -63,10 +69,21 @@ func SetupUI(window fyne.Window) {
 	}
 
 	startupCheck := widget.NewCheck("Fazer backup ao iniciar o computador", func(checked bool) {
-		BackupOnStartup = checked
+		backupOnStartup = checked
 		checkIfChanged()
 	})
-	startupCheck.SetChecked(BackupOnStartup)
+	startupCheck.SetChecked(backupOnStartup)
+
+	maxBackupsSelect := widget.NewSelect(
+		[]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"},
+		func(selected string) {
+			if val, err := strconv.Atoi(selected); err == nil {
+				maxBackups = val
+				checkIfChanged()
+			}
+		},
+	)
+	maxBackupsSelect.SetSelected(strconv.Itoa(maxBackups))
 
 	backupBtn := widget.NewButton("Fazer Backup Agora", func() {
 		sourcePath := sourceEntry.Text
@@ -78,13 +95,38 @@ func SetupUI(window fyne.Window) {
 		}
 
 		go func() {
-			if err := backup.CreateBackup(sourceEntry.Text, destinationEntry.Text); err != nil {
+			err := backup.CreateBackup(sourceEntry.Text, destinationEntry.Text, maxBackups)
+			if err != nil {
 				dialog.ShowError(err, window)
 				return
 			}
 
 			dialog.ShowInformation("Aviso", "Backup realizado com sucesso!", window)
 		}()
+	})
+
+	resetBtn := widget.NewButton("Limpar Configurações", func() {
+		dialog.ShowConfirm(
+			"Confirmar Ação",
+			"Deseja realmente apagar todas as configurações salvas?",
+			func(confirmed bool) {
+				if !confirmed {
+					return
+				}
+
+				err := config.ClearConfig()
+				if err != nil {
+					dialog.ShowError(err, window)
+					return
+				}
+				sourceEntry.SetText("")
+				destinationEntry.SetText("")
+				startupCheck.SetChecked(false)
+				maxBackupsSelect.SetSelected("3")
+				dialog.ShowInformation("Sucesso", "Configurações limpas com sucesso!", window)
+			},
+			window,
+		)
 	})
 
 	saveBtn = widget.NewButton("Salvar Configurações", func() {
@@ -98,7 +140,7 @@ func SetupUI(window fyne.Window) {
 
 		cfg.SourceDir = sourcePath
 		cfg.DestinationDir = destinationPath
-		cfg.BackupOnStartup = BackupOnStartup
+		cfg.BackupOnStartup = backupOnStartup
 
 		if err := config.SaveConfig(cfg); err != nil {
 			dialog.ShowError(err, window)
@@ -114,13 +156,20 @@ func SetupUI(window fyne.Window) {
 		saveBtn.Disable()
 	})
 
+	backupBtn.Importance = widget.HighImportance
+	resetBtn.Importance = widget.DangerImportance
+	saveBtn.Importance = widget.SuccessImportance
+
 	content := container.NewVBox(
 		widget.NewLabel("Pasta de Origem (Save do Jogo):"),
 		sourceRow,
 		widget.NewLabel("Pasta de Destino (Onde salvar o ZIP):"),
 		destinationRow,
+		widget.NewLabel("Limite Máximo de Backups:"),
+		maxBackupsSelect,
 		startupCheck,
 		backupBtn,
+		resetBtn,
 		saveBtn,
 	)
 

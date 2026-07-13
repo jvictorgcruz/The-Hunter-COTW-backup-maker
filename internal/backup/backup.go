@@ -22,7 +22,7 @@ func AutoBackup() error {
 		return err
 	}
 
-	err = CreateBackup(config.SourceDir, config.DestinationDir)
+	err = CreateBackup(config.SourceDir, config.DestinationDir, config.MaxBackups)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func BackupOnStartup() error {
 	return nil
 }
 
-func CreateBackup(sourceDir string, destinationPath string) error {
+func CreateBackup(sourceDir string, destinationPath string, limit int) error {
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	destinationZipPath := filepath.Join(destinationPath, backupPrefix+timestamp+backupSuffix)
 	zipFile, err := os.Create(destinationZipPath)
@@ -91,7 +91,7 @@ func CreateBackup(sourceDir string, destinationPath string) error {
 		return err
 	}
 
-	if err := cleanupOldBackups(destinationPath, 3); err != nil {
+	if err := cleanupOldBackups(destinationPath, limit); err != nil {
 		return err
 	}
 
