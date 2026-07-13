@@ -4,6 +4,7 @@ import (
 	"backup-maker/internal/backup"
 	"backup-maker/internal/ui"
 	"flag"
+	"os"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -13,6 +14,7 @@ import (
 func main() {
 	autostartMode := flag.Bool("autostart", false, "Executa o backup em background e fecha")
 	flag.Parse()
+	os.Setenv("FYNE_SYSTEM_DIALOGS", "1")
 
 	app := app.NewWithID("com.jvictorgcruz.cotw-backup-maker")
 	window := app.NewWindow("The Hunter: Call of the Wild Backup Maker")

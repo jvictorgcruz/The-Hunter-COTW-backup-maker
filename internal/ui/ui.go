@@ -3,12 +3,14 @@ package ui
 import (
 	_ "embed"
 	"errors"
+	"os"
 	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 
 	"backup-maker/internal/backup"
@@ -181,11 +183,31 @@ func createFolderSelector(placeholder string, window fyne.Window) (*widget.Entry
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder(placeholder)
 	btn := widget.NewButton("Buscar...", func() {
-		dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
+		folderDialog := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
 			if err == nil && uri != nil {
 				entry.SetText(uri.Path())
 			}
 		}, window)
+
+		defer folderDialog.Show()
+
+		currentPath := entry.Text
+		if currentPath == "" {
+			return
+		}
+
+		info, err := os.Stat(currentPath)
+		if err != nil || !info.IsDir() {
+			return
+		}
+
+		fileURI := storage.NewFileURI(currentPath)
+		folderURI, err := storage.ListerForURI(fileURI)
+		if err != nil {
+			return
+		}
+
+		folderDialog.SetLocation(folderURI)
 	})
 	row := container.NewBorder(nil, nil, nil, btn, entry)
 	return entry, row
