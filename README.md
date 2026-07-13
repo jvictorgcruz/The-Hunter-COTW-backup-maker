@@ -11,7 +11,7 @@ The **COTW Save Backup Maker** is a lightweight, modern, and cross-platform desk
 - **System Tray (Systray)**: The app minimizes to the system tray, running silently in the background without interrupting your gameplay.
 - **Start with the PC**: Registers permanently in the operating system's startup (Linux `.desktop` and Windows Registry) to remain active in the background.
 - **Smart Backup**: Recursive `.zip` compression with chronological naming and safe stream handling.
-- **Automatic Cleanup (Rotation)**: Automatically keeps only the **3 most recent backups** in your storage, deleting older ones to save disk space.
+- **Automatic Cleanup (Rotation)**: Automatically keeps only the **`Defined amount` most recent backups** in your storage, deleting older ones to save disk space.
 - **Backup on Boot**: Option to trigger a silent, automatic backup when your computer starts, hiding in the tray immediately after.
 
 ---
