@@ -72,20 +72,15 @@ Since Fyne requires CGO, to build the Windows `.exe` from Linux you will need **
    ```
    *The executable `backup-maker.exe` will be generated inside the `fyne-cross/dist/windows-amd64/` directory.*
 
-If you are running **natively on a Windows machine**, you can just run:
+If you are running **natively on a Windows machine**, you can just:
+Enter the main package directory:
+   ```bash
+   cd cmd/backup-maker
+   ```
+run:
 ```cmd
-fyne package -os windows -icon assets/icon.png
+fyne package -os windows -icon ../../assets/icon.png
 ```
-
----
-
-## Future Roadmap
-
-Planned improvements for future versions include:
-
-- [V] **Custom Rotation Limit in UI**: Input field in the graphical interface to customize the number of stored backups (currently hardcoded to 3).
-- [ ] **Scheduled Backups (Native)**: Native background `Cron` system to perform periodic backups while the game is open.
-- [ ] **Cloud Integration (Google Drive)**: OAuth2 login via web browser to automatically upload backups to the cloud securely.
 
 ---
 
