@@ -1,62 +1,94 @@
+# COTW Save Backup Maker
 
-# The-Hunter-COTW-backup-maker
+The **COTW Save Backup Maker** is a lightweight, modern, and cross-platform desktop application written in **Go** using the **Fyne** GUI library. It is designed to manage and automate backups for the game *The Hunter: Call of the Wild*, protecting your progress against save file corruption, file loss, or accidental new game initialization.
 
-Simple The Hunter Call of the Wild backup maker to create save game backup on execution
+---
 
-See [Links](https://github.com/jvictorgcruz/The-Hunter-COTW-backup-maker#links) section to get help
+## Features
 
+- **Automatic Detection**: Automatically detects your game save directory on **Windows** and **Linux** (scanning standard paths, Steam, Epic Games Store, and OneDrive folders).
+- **Graphical Interface**: Offers interactive fields for directory selection and feature toggles.
+- **System Tray (Systray)**: The app minimizes to the system tray, running silently in the background without interrupting your gameplay.
+- **Start with the PC**: Registers permanently in the operating system's startup (Linux `.desktop` and Windows Registry) to remain active in the background.
+- **Smart Backup**: Recursive `.zip` compression with chronological naming and safe stream handling.
+- **Automatic Cleanup (Rotation)**: Automatically keeps only the **3 most recent backups** in your storage, deleting older ones to save disk space.
+- **Backup on Boot**: Option to trigger a silent, automatic backup when your computer starts, hiding in the tray immediately after.
 
-To use this, you need to have *[python](https://wiki.python.org/moin/BeginnersGuide)* installed.
+---
 
-If you want, you can create a executable with *[pyinstaller](https://pyinstaller.org/en/v4.2/installation.html)* in two steps:
+## How to Run from Source (Development)
 
+### Prerequisites
+1. **Go installed** (version 1.22 or superior).
+2. **C Compiler (GCC/CGO)** installed on the system (required for Fyne's OpenGL bindings to compile graphical interface resources).
+   - *On Ubuntu/Debian*: `sudo apt install build-essential libgl1-mesa-dev libegl1-mesa-dev libx11-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev`
 
+### Execution steps:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/jvictorgcruz/The-Hunter-COTW-backup-maker.git
+   cd The-Hunter-COTW-backup-maker
+   ```
+2. Download module dependencies:
+   ```bash
+   go mod tidy
+   ```
+3. Run the application directly:
+   ```bash
+   go run ./cmd/backup-maker
+   ```
 
+---
 
-## Installing and creating .exe
+## How to Compile and Package (Release)
 
-1. Clone this repository
+To generate standalone packages with the official icon embedded and without terminal windows associated:
 
+### 1. Install Fyne CLI
 ```bash
-    git clone https://github.com/jvictorgcruz/The-Hunter-COTW-backup-maker
-```
-2. Install *[pyinstaller](https://pyinstaller.org/en/v4.2/installation.html)*
-
-3. Run command to create .exe file (Need to be in repository folder clone)
-
-```bash
-  pyinstaller --onefile main.py
+go install fyne.io/tools/cmd/fyne@latest
 ```
 
-4. Now you already can use the .exe created in */dist* to start backup the save game automatically:
+### 2. Generate Release for Linux
+1. Enter the main package directory:
+   ```bash
+   cd cmd/backup-maker
+   ```
+2. Generate the package (`.tar.xz`):
+   ```bash
+   ~/go/bin/fyne package -os linux -icon ../../assets/icon.png
+   ```
 
-    
-**Tip**
-- Use in *[.bat](https://www.shellhacks.com/create-batch-file-bat-to-run-exe-program/)* file to start with the game
-- Use on *[Windows Startup](https://www.howtogeek.com/208224/how-to-add-a-program-to-startup-in-windows/)* to backup on every Windows Start
-    
-## Config
+### 3. Generate Release for Windows
+Since Fyne requires CGO, to build the Windows `.exe` from Linux you will need **Docker** and the **`fyne-cross`** tool:
 
-You need to setup the values on config.cfg to application get the correct save game path
-- The config file is create automatically if no one is found
-\
-*default *config.cfg*
-``` bash
-[Settings]
-epic_games = True  # if you are using Epic Games Version
-onedrive = False  # If you are using onedrive to your 'Documents' folder
+1. Install `fyne-cross`:
+   ```bash
+   go install github.com/fyne-io/fyne-cross@latest
+   ```
+2. From the root directory, run the cross-compilation command:
+   ```bash
+   ~/go/bin/fyne-cross windows -icon assets/icon.png cmd/backup-maker/main.go
+   ```
+   *The executable `backup-maker.exe` will be generated inside the `fyne-cross/dist/windows-amd64/` directory.*
+
+If you are running **natively on a Windows machine**, you can just run:
+```cmd
+fyne package -os windows -icon assets/icon.png
 ```
 
+---
 
+## Future Roadmap
 
+Planned improvements for future versions include:
 
-## Links
+- [ ] **Custom Rotation Limit in UI**: Input field in the graphical interface to customize the number of stored backups (currently hardcoded to 3).
+- [ ] **Scheduled Backups (Native)**: Native background `Cron` system to perform periodic backups while the game is open.
+- [ ] **Cloud Integration (Google Drive)**: OAuth2 login via web browser to automatically upload backups to the cloud securely.
 
- - [Install python](https://wiki.python.org/moin/BeginnersGuide)
- - [Install pyinstaller](https://pyinstaller.org/en/v4.2/installation.html)
- - [How to clone github repository](https://docs.github.com/pt/repositories/creating-and-managing-repositories/cloning-a-repository)
-  - [How to create a .bat start file](https://www.shellhacks.com/create-batch-file-bat-to-run-exe-program/)
-  - [How to create windows startup file](https://www.howtogeek.com/208224/how-to-add-a-program-to-startup-in-windows/)
+---
 
+## License
 
-
+This project is open-source under the terms of the repository license.

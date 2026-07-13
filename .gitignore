@@ -4,6 +4,7 @@ build
 dist
 
 .mypy_cache
-*.ico
 *.lnk
 *.rar
+
+docs/
