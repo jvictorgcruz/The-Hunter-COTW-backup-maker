@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"errors"
 	"os"
+	"slices"
 	"strconv"
 
 	"fyne.io/fyne/v2"
@@ -31,14 +32,16 @@ func SetupUI(window fyne.Window) {
 		dialog.ShowError(err, window)
 	}
 
-	sourceEntry, sourceRow := createFolderSelector("Selecione a pasta de origem...", window)
+	localEnabled := slices.Contains(cfg.EnabledProviders, "local")
+
+	sourceEntry, _, sourceRow := createFolderSelector("Selecione a pasta de origem...", window)
 	if cfg.SourceDir != "" {
 		sourceEntry.SetText(cfg.SourceDir)
 	} else if defaultPath := paths.DetectSavePath(); defaultPath != "" {
 		sourceEntry.SetText(defaultPath)
 	}
 
-	destinationEntry, destinationRow := createFolderSelector("Selecione a pasta de destino...", window)
+	destinationEntry, destinationBtn, destinationRow := createFolderSelector("Selecione a pasta de destino...", window)
 	destinationEntry.SetText(cfg.DestinationDir)
 
 	backupOnStartup := cfg.BackupOnStartup
@@ -47,18 +50,45 @@ func SetupUI(window fyne.Window) {
 	}
 	maxBackups := cfg.MaxBackups
 
+	var localCheck *widget.Check
+
 	checkIfChanged := func() {
 		if saveBtn == nil {
 			return
 		}
+
+		var currentProviders []string
+		if localEnabled {
+			currentProviders = append(currentProviders, "local")
+		}
+
+		if len(currentProviders) == 0 {
+			saveBtn.Disable()
+			return
+		}
+
+		providersChanged := !slices.Equal(currentProviders, cfg.EnabledProviders)
+
 		hasChanges := sourceEntry.Text != cfg.SourceDir ||
 			destinationEntry.Text != cfg.DestinationDir ||
 			backupOnStartup != cfg.BackupOnStartup ||
-			maxBackups != cfg.MaxBackups
+			maxBackups != cfg.MaxBackups ||
+			providersChanged
+
 		if hasChanges {
 			saveBtn.Enable()
 		} else {
 			saveBtn.Disable()
+		}
+	}
+
+	toggleLocalVisibility := func(enabled bool) {
+		if enabled {
+			destinationEntry.Enable()
+			destinationBtn.Enable()
+		} else {
+			destinationEntry.Disable()
+			destinationBtn.Disable()
 		}
 	}
 
@@ -69,6 +99,13 @@ func SetupUI(window fyne.Window) {
 	destinationEntry.OnChanged = func(text string) {
 		checkIfChanged()
 	}
+
+	localCheck = widget.NewCheck("Backup Local (Pasta de destino do .zip)", func(checked bool) {
+		localEnabled = checked
+		toggleLocalVisibility(checked)
+		checkIfChanged()
+	})
+	localCheck.SetChecked(localEnabled)
 
 	startupCheck := widget.NewCheck("Fazer backup ao iniciar o computador", func(checked bool) {
 		backupOnStartup = checked
@@ -91,13 +128,23 @@ func SetupUI(window fyne.Window) {
 		sourcePath := sourceEntry.Text
 		destinationPath := destinationEntry.Text
 
-		if sourcePath == "" || destinationPath == "" {
-			dialog.ShowError(errors.New("Por favor, selecione as pastas de origem e destino."), window)
+		if sourcePath == "" {
+			dialog.ShowError(errors.New("Por favor, selecione a pasta de origem."), window)
 			return
 		}
 
+		if localEnabled && destinationPath == "" {
+			dialog.ShowError(errors.New("Por favor, selecione a pasta de destino local."), window)
+			return
+		}
+
+		var activeProviders []string
+		if localEnabled {
+			activeProviders = append(activeProviders, "local")
+		}
+
 		go func() {
-			err := backup.CreateBackup(sourceEntry.Text, destinationEntry.Text, maxBackups)
+			err := backup.CreateBackup(sourceEntry.Text, activeProviders, maxBackups)
 			if err != nil {
 				dialog.ShowError(err, window)
 				return
@@ -125,6 +172,7 @@ func SetupUI(window fyne.Window) {
 				destinationEntry.SetText("")
 				startupCheck.SetChecked(false)
 				maxBackupsSelect.SetSelected("3")
+				localCheck.SetChecked(true)
 				dialog.ShowInformation("Sucesso", "Configurações limpas com sucesso!", window)
 			},
 			window,
@@ -135,14 +183,26 @@ func SetupUI(window fyne.Window) {
 		sourcePath := sourceEntry.Text
 		destinationPath := destinationEntry.Text
 
-		if sourcePath == "" || destinationPath == "" {
-			dialog.ShowError(errors.New("Por favor, selecione as pastas de origem e destino."), window)
+		if sourcePath == "" {
+			dialog.ShowError(errors.New("Por favor, selecione a pasta de origem."), window)
+			return
+		}
+
+		if localEnabled && destinationPath == "" {
+			dialog.ShowError(errors.New("Por favor, selecione a pasta de destino local."), window)
 			return
 		}
 
 		cfg.SourceDir = sourcePath
 		cfg.DestinationDir = destinationPath
 		cfg.BackupOnStartup = backupOnStartup
+		cfg.MaxBackups = maxBackups
+
+		var activeProviders []string
+		if localEnabled {
+			activeProviders = append(activeProviders, "local")
+		}
+		cfg.EnabledProviders = activeProviders
 
 		if err := config.SaveConfig(cfg); err != nil {
 			dialog.ShowError(err, window)
@@ -165,11 +225,15 @@ func SetupUI(window fyne.Window) {
 	content := container.NewVBox(
 		widget.NewLabel("Pasta de Origem (Save do Jogo):"),
 		sourceRow,
-		widget.NewLabel("Pasta de Destino (Onde salvar o ZIP):"),
+		widget.NewSeparator(),
+		widget.NewLabel("Destinos de Backup:"),
+		localCheck,
 		destinationRow,
+		widget.NewSeparator(),
 		widget.NewLabel("Limite Máximo de Backups:"),
 		maxBackupsSelect,
 		startupCheck,
+		widget.NewSeparator(),
 		backupBtn,
 		resetBtn,
 		saveBtn,
@@ -177,9 +241,10 @@ func SetupUI(window fyne.Window) {
 
 	saveBtn.Disable()
 	window.SetContent(content)
+	toggleLocalVisibility(localEnabled)
 }
 
-func createFolderSelector(placeholder string, window fyne.Window) (*widget.Entry, fyne.CanvasObject) {
+func createFolderSelector(placeholder string, window fyne.Window) (*widget.Entry, *widget.Button, fyne.CanvasObject) {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder(placeholder)
 	btn := widget.NewButton("Buscar...", func() {
@@ -210,7 +275,7 @@ func createFolderSelector(placeholder string, window fyne.Window) (*widget.Entry
 		folderDialog.SetLocation(folderURI)
 	})
 	row := container.NewBorder(nil, nil, nil, btn, entry)
-	return entry, row
+	return entry, btn, row
 }
 
 func SetupSystray(app fyne.App, window fyne.Window) {

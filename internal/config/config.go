@@ -5,13 +5,25 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 )
 
 type Config struct {
-	SourceDir       string `json:"source_dir" validate:"required,dir_exists"`
-	DestinationDir  string `json:"destination_dir" validate:"required,dir_exists"`
-	BackupOnStartup bool   `json:"autostart"`
-	MaxBackups      int    `json:"max_backups" validate:"required,min=1,max=10"`
+	SourceDir        string   `json:"source_dir" validate:"required,dir_exists"`
+	DestinationDir   string   `json:"destination_dir" validate:"required,dir_exists"`
+	BackupOnStartup  bool     `json:"autostart"`
+	MaxBackups       int      `json:"max_backups" validate:"required,min=1,max=10"`
+	EnabledProviders []string `json:"enabled_providers" validate:"required,min=1"`
+}
+
+func NewDefaultConfig() *Config {
+	return &Config{
+		SourceDir:        "",
+		DestinationDir:   "",
+		BackupOnStartup:  false,
+		MaxBackups:       3,
+		EnabledProviders: []string{"local"},
+	}
 }
 
 func SaveConfig(cfg *Config) error {
@@ -44,7 +56,7 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	cfg := &Config{}
+	cfg := NewDefaultConfig()
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -97,4 +109,18 @@ func BackupOnStartupActive() bool {
 	}
 
 	return cfg.BackupOnStartup
+}
+
+func GetEnabledProvidersIds() []string {
+	cfg, err := LoadConfig()
+	if err != nil {
+		return []string{}
+	}
+
+	return cfg.EnabledProviders
+}
+
+func isEnabledProvider(providerId string) bool {
+	enabledProvidersIds := GetEnabledProvidersIds()
+	return slices.Contains(enabledProvidersIds, providerId)
 }
