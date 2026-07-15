@@ -7,12 +7,15 @@ The **COTW Save Backup Maker** is a lightweight, modern, and cross-platform desk
 ## Features
 
 - **Automatic Detection**: Automatically detects your game save directory on **Windows** and **Linux** (scanning standard paths, Steam, Epic Games Store, and OneDrive folders).
-- **Graphical Interface**: Offers interactive fields for directory selection and feature toggles.
+- **Multiple Backup Destinations**: Configurable support for both **Local storage** (saving zip backups to a local folder of your choice) and **Microsoft OneDrive** cloud backup. You can enable either or both simultaneously!
+- **OneDrive Cloud Integration**: Fully native cloud backups. Login securely in your browser via OAuth2 (using a built-in local server) and automatically store your backups under a dedicated folder (`/Apps/COTW Backup Maker`).
+- **Graphical Interface**: Clean, modern UI offering interactive fields for directory selection, provider checkboxes, and visual toggles.
 - **System Tray (Systray)**: The app minimizes to the system tray, running silently in the background without interrupting your gameplay.
 - **Start with the PC**: Registers permanently in the operating system's startup (Linux `.desktop` and Windows Registry) to remain active in the background.
 - **Smart Backup**: Recursive `.zip` compression with chronological naming and safe stream handling.
-- **Automatic Cleanup (Rotation)**: Automatically keeps only the **`Defined amount` most recent backups** in your storage, deleting older ones to save disk space.
+- **Automatic Cleanup (Rotation)**: Automatically keeps only the **`Defined amount` most recent backups** in your selected storage destinations (both local folder and OneDrive), deleting older ones to save space.
 - **Backup on Boot**: Option to trigger a silent, automatic backup when your computer starts, hiding in the tray immediately after.
+
 
 ---
 

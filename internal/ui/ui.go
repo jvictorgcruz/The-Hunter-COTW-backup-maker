@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	_ "embed"
 	"errors"
 	"os"
@@ -16,6 +17,7 @@ import (
 
 	"backup-maker/internal/backup"
 	"backup-maker/internal/config"
+	"backup-maker/internal/onedrive"
 	"backup-maker/internal/paths"
 	"backup-maker/internal/startup"
 )
@@ -33,6 +35,7 @@ func SetupUI(window fyne.Window) {
 	}
 
 	localEnabled := slices.Contains(cfg.EnabledProviders, "local")
+	onedriveEnabled := slices.Contains(cfg.EnabledProviders, "onedrive")
 
 	sourceEntry, _, sourceRow := createFolderSelector("Selecione a pasta de origem...", window)
 	if cfg.SourceDir != "" {
@@ -51,6 +54,7 @@ func SetupUI(window fyne.Window) {
 	maxBackups := cfg.MaxBackups
 
 	var localCheck *widget.Check
+	var onedriveCheck *widget.Check
 
 	checkIfChanged := func() {
 		if saveBtn == nil {
@@ -60,6 +64,9 @@ func SetupUI(window fyne.Window) {
 		var currentProviders []string
 		if localEnabled {
 			currentProviders = append(currentProviders, "local")
+		}
+		if onedriveEnabled {
+			currentProviders = append(currentProviders, "onedrive")
 		}
 
 		if len(currentProviders) == 0 {
@@ -107,6 +114,26 @@ func SetupUI(window fyne.Window) {
 	})
 	localCheck.SetChecked(localEnabled)
 
+	onedriveCheck = widget.NewCheck("Backup no OneDrive", func(checked bool) {
+		onedriveEnabled = checked
+		if checked {
+			if !onedrive.IsAuthenticated() {
+				go func() {
+					_, err := onedrive.GetClient(context.Background())
+					if err != nil {
+						dialog.ShowError(err, window)
+						onedriveCheck.SetChecked(false)
+					} else {
+						dialog.ShowInformation("OneDrive", "Autenticação realizada com sucesso!", window)
+						checkIfChanged()
+					}
+				}()
+			}
+		}
+		checkIfChanged()
+	})
+	onedriveCheck.SetChecked(onedriveEnabled)
+
 	startupCheck := widget.NewCheck("Fazer backup ao iniciar o computador", func(checked bool) {
 		backupOnStartup = checked
 		checkIfChanged()
@@ -138,9 +165,17 @@ func SetupUI(window fyne.Window) {
 			return
 		}
 
+		if onedriveEnabled && !onedrive.IsAuthenticated() {
+			dialog.ShowError(errors.New("O OneDrive está ativado, mas você não está autenticado. Por favor, marque e desmarque o OneDrive para realizar o login."), window)
+			return
+		}
+
 		var activeProviders []string
 		if localEnabled {
 			activeProviders = append(activeProviders, "local")
+		}
+		if onedriveEnabled {
+			activeProviders = append(activeProviders, "onedrive")
 		}
 
 		go func() {
@@ -173,6 +208,7 @@ func SetupUI(window fyne.Window) {
 				startupCheck.SetChecked(false)
 				maxBackupsSelect.SetSelected("3")
 				localCheck.SetChecked(true)
+				onedriveCheck.SetChecked(false)
 				dialog.ShowInformation("Sucesso", "Configurações limpas com sucesso!", window)
 			},
 			window,
@@ -202,6 +238,9 @@ func SetupUI(window fyne.Window) {
 		if localEnabled {
 			activeProviders = append(activeProviders, "local")
 		}
+		if onedriveEnabled {
+			activeProviders = append(activeProviders, "onedrive")
+		}
 		cfg.EnabledProviders = activeProviders
 
 		if err := config.SaveConfig(cfg); err != nil {
@@ -229,6 +268,7 @@ func SetupUI(window fyne.Window) {
 		widget.NewLabel("Destinos de Backup:"),
 		localCheck,
 		destinationRow,
+		onedriveCheck,
 		widget.NewSeparator(),
 		widget.NewLabel("Limite Máximo de Backups:"),
 		maxBackupsSelect,

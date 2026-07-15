@@ -11,14 +11,8 @@ import (
 
 type LocalProvider struct{}
 
-var _ BackupProvider = (*LocalProvider)(nil)
-
 func (lp *LocalProvider) ID() string {
 	return "local"
-}
-
-func (lp *LocalProvider) Name() string {
-	return "Local"
 }
 
 func (lp *LocalProvider) IsConfigured() bool {

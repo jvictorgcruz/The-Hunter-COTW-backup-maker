@@ -2,7 +2,6 @@ package backup
 
 type BackupProvider interface {
 	ID() string
-	Name() string
 	IsConfigured() bool
 	Send(localZipPath string, filename string) error
 	Cleanup(limit int) error
