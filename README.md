@@ -75,15 +75,27 @@ Since Fyne requires CGO, to build the Windows `.exe` from Linux you will need **
    ```
    *The executable `backup-maker.exe` will be generated inside the `fyne-cross/dist/windows-amd64/` directory.*
 
-If you are running **natively on a Windows machine**, you can just:
-Enter the main package directory:
-   ```bash
-   cd cmd/backup-maker
+If you are running **natively on a Windows machine**, you can automate the compilation and create a setup installer using the provided `build.bat` script:
+
+1. Install [Inno Setup](https://jrsoftware.org/isinfo.php) and ensure `iscc` (the compiler executable) is in your system `PATH`.
+2. Run the `build.bat` script from the project root:
+   ```cmd
+   .\build.bat
    ```
-run:
-```cmd
-fyne package -os windows -icon ../../assets/icon.png
-```
+   *This packages the app and compiles the setup installer `COTWBackupMakerSetup.exe` inside the `Output/` directory.*
+
+To package the application and compile the installer manually:
+1. Enter the main package directory and run `fyne package`:
+   ```cmd
+   cd cmd/backup-maker
+   fyne package -os windows -icon ../../assets/icon.png
+   ```
+2. In the root directory, compile the `installer.iss` script:
+   - Either open `installer.iss` in Inno Setup Compiler and compile it (`Ctrl + F9`),
+   - Or run from the terminal:
+     ```cmd
+     iscc installer.iss
+     ```
 
 ---
 

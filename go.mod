@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	fyne.io/fyne/v2 v2.8.0
 	github.com/go-playground/validator/v10 v10.30.3
+	golang.org/x/oauth2 v0.36.0
 	golang.org/x/sys v0.47.0
 )
 
@@ -46,7 +47,6 @@ require (
 	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/net v0.54.0 // indirect
-	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

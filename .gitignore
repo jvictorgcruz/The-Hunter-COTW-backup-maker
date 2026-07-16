@@ -10,5 +10,6 @@ dist
 *.exe
 
 docs/
+Output/
 cmd/backup-maker/*
 !cmd/backup-maker/main.go
