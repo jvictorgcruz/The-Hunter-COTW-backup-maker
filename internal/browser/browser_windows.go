@@ -8,8 +8,8 @@ func OpenBrowser(url string) error {
 	var cmd string
 	var args []string
 
-	cmd = "cmd"
-	args = []string{"/c", "start", url}
+	cmd = "rundll32"
+	args = []string{"url.dll,FileProtocolHandler", url}
 
 	return exec.Command(cmd, args...).Start()
 }
